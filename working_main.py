@@ -11,6 +11,5 @@ pi.set_mode(pin12, pigpio.OUTPUT)
 try:
     move(pi)
 finally:
-    pi.wave_tx_stop()
-    pi.wave_clear()
+    pi.set_servo_pulsewidth(pin12,0)
     pi.stop()
