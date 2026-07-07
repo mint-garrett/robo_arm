@@ -1,15 +1,17 @@
 import pigpio
-from movement_functions import move, pin12
+from movement_functions import move, MOTORS
 
 pi = pigpio.pi()
 if not pi.connected:
     print("daemon not working")
     raise SystemExit
 
-pi.set_mode(pin12, pigpio.OUTPUT)
+for m in MOTORS.values():
+    pi.set_mode(m["pin"], pigpio.OUTPUT)
 
 try:
     move(pi)
 finally:
-    pi.set_servo_pulsewidth(pin12,0)
+    for m in MOTORS.values():
+        pi.set_servo_pulsewidth(m["pin"],0)
     pi.stop()

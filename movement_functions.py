@@ -4,13 +4,42 @@ import sys
 import termios
 import time
 import tty
-
-pin12 = 12
+##servo data
 period = 20000  # 50 Hz
-
 POS_0   = 1000
 POS_90  = 1500
 POS_180 = 2000
+##motor dictionary
+MOTORS = {
+    "servo1": {
+        "pin": 12,
+        "position": POS_90,
+        "key_bindings": {"to_0":"z", "to_90":"x", "to_180":"c"},
+        "last_key":None,
+        "last_key_time": 0.0,
+    },
+    "servo2": {
+        "pin":13,
+        "position":POS_0,
+        "key_bindings":{"to_0":"a","to_90":"s", "to_180":"d"},
+        "last_key":None,
+        "last_key_time":0.0,
+    },
+    "servo3": {
+        "pin":"ADD HERE",
+        "position":POS_90,
+        "key_bindings":{"to_0":"q", "to_90":"w","to_180":"e"},
+        "last_key":None,
+        "last_key_time": 0.0
+    },
+    "servo4": {
+        "pin":"ADD HERE",
+        "position":POS_90,
+        "key_bindings":{"I DO NOT KNOW"},
+        "last_key":None,
+        "last_key_time": 0.0
+    }
+}
 #timing variables for move function
 step = 20
 repeat_key_buffer = .2
@@ -23,18 +52,17 @@ def get_key():
     return None
 
 ##early move function, used to initialize move function
-def move_to(pi, pulse_width):
+def move_to(pi, pin, pulse_width):
     pulse_width = max(POS_0, min(POS_180, pulse_width))
-    pi.set_servo_pulsewidth(pin12, pulse_width)
+    pi.set_servo_pulsewidth(pin, pulse_width)
     return pulse_width
 
 def move(pi):
-    desired_direction = POS_90
-    last_key = None
-    last_key_time = 0.0
-    key_accept = False
     
-    move_to(pi, desired_direction)
+    #all motors to starting positions
+    for m in MOTORS.values():
+        move_to(pi,m["pin"], m["position"])
+    
     time.sleep(.5)
 
     ##gets current terminal attributes and switces to cbreak for character-by character interpretation
@@ -44,43 +72,47 @@ def move(pi):
     
     try:
         while True:
-            print("servo 1 listening!")
             key = get_key()
             if key is None:
                 time.sleep(delay)
                 continue
+            #master exit
+            if key == '\x1b':
+                break
                 
             current_time= time.time()
             
-            if key == '\x1b':
-                break
-            if key in ('a','d','m'):
-                key_accept = False
-                
-                if key == 'm': ##accept variable is the "gateway" to movement
+            for name, m in MOTORS.items():
+              k = m["key_bindings"]
+              if key not in (k["to_0"],k["to_90"], k["to_180"]):
+                  continue
+                  ####TODO: fix indentation errors
+                  key_accept = False
+                  if key == k["to_90"]:
+                      key_accept = True
+                  elif key != m["last_key"]:
                     key_accept = True
-                elif key != last_key:
-                    key_accept = True
-                elif (current_time - last_key_time) >= repeat_key_buffer:
+                  elif (current_time - m["last_key_time"]) >= repeat_key_buffer:
                     key_accept = True
                     
-                if key_accept: #allows movement incrementally, or to the middle position
-                    if key == 'd':
-                        desired_direction -= step
-                    elif key == 'a':
-                        desired_direction += step
-                    elif key == 'm':
-                        desired_direction = POS_90
+                  if key_accept: #allows movement incrementally, or to the middle position
+                      if key == m["to_0"]:
+                          m["position"] -= step
+                      elif key == m["to_180"]:
+                          m["position"] += step
+                      elif key == m["to_90"]:
+                          m["position"] = POS_90
                         
-                    desired_direction = move_to(pi, desired_direction)
-                    print(f"rpos: {desired_direction} us   ", end='', flush = True)
-                    last_key = key
-                    last_key_time = current_time
+                    m["position"] = move_to(pi, m["pin"],m["position"])
+                    print(f"{name}: {m['position']}us ", end='', flush = True)
+                    m["last_key"] = key 
+                    m["last_key_time"] = current_time
+                    break
                 
-            elif key is not None:
-                last_key = None
-                
-                time.sleep(delay)
+                  else:
+                    pass
+                    
+                  time.sleep(delay)
 
     finally:
         #resets terminal to normal
