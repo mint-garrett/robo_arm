@@ -7,7 +7,7 @@ if not pi.connected:
     raise SystemExit
 
 for m in MOTORS.values():
-    pi.set_mode(m["pin"], pigpio.OUTPUT)
+    pi.set_mode(int(m["pin"]), pigpio.OUTPUT)
 
 try:
     move(pi)
