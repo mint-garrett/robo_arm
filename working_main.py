@@ -1,5 +1,8 @@
 import pigpio
+import subprocess
 from movement_functions import move, MOTORS
+
+subprocess.check_call("sudo pigpiod", shell = True)
 
 pi = pigpio.pi()
 if not pi.connected:
