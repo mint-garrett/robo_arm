@@ -69,8 +69,8 @@ def move(pi):
     tty.setcbreak(fd)
     
     try:
+        print("starting!")
         while True:
-            print("starting!")
             key = get_key()
             if key is None:
                 time.sleep(delay)
@@ -85,27 +85,24 @@ def move(pi):
                 k = m["key_bindings"]
                 if key not in (k["to_0"],k["to_90"],k["to_180"]):
                     continue
-                  ####TODO: fix indentation errors
                 key_accept = False
                 if key == k["to_90"]:
                     key_accept = True
-                    print("hi 90")
                 elif key != m["last_key"]:
                     key_accept = True
-                    print("hilast key")
                 elif (current_time - m["last_key_time"]) >= repeat_key_buffer:
                     key_accept = True
                 
                 if key_accept: #allows movement incrementally, or to the middle position
                     if key == k['to_0']:
                         m["position"] -= step
-                        print("hi - step")
+                        print(f"{k["to_0"]} pressed, wf length is now: {m["position"]}")
                     elif key == k['to_180']:
                         m["position"] += step
-                        print("hi + step")
+                        print(f"{k["to_180"]} pressed, wf length is now: {m["position"]}")
                     elif key == k['to_90']:
                         m["position"] = POS_90
-                        print("hi middle")
+                        print(f"{k["to_90"]} pressed, center wf: {m["position"]}")
                         
                     m["position"] = move_to(pi, m["pin"],m["position"])                 
                     m["last_key"] = key 
