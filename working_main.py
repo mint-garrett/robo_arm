@@ -1,8 +1,18 @@
 import pigpio
 import subprocess
+import time
+
 from movement_functions import move, MOTORS
 
-subprocess.check_call("sudo pigpiod", shell = True)
+try:
+    subprocess.run("sudo pigpiod", timeout = 5, shell = True)
+    print("subprocess executed")
+    time.sleep (2)
+except subprocess.TimeoutExpired as f:
+    print(f"pigpiod is started but timed out waiting: {f}")
+except subprocess.CalledProcessError as e:
+    print(f"sudo pigpiod failed to execute: {e}")
+
 
 pi = pigpio.pi()
 if not pi.connected:
