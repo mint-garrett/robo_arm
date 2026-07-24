@@ -4,37 +4,47 @@ import sys
 import termios
 import time
 import tty
+
 ##servo data
 period = 20000  # 50 Hz
 POS_0   = 1000
 POS_90  = 1500
 POS_180 = 2000
 ##motor dictionary
+
 MOTORS = {
     "servo1": {
+        "location":"base",
         "pin": 12,
-        "position": POS_90,
+        "wf_pos": POS_90,
+        "coord_pos":0,
         "key_bindings": {"to_0":"z", "to_90":"x", "to_180":"c"},
         "last_key":None,
         "last_key_time": 0.0,
     },
     "servo2": {
+        "location":"shoulder",
         "pin":13,
-        "position":POS_0,
+        "wf_pos":POS_0,
+        "coord_pos":0,
         "key_bindings":{"to_0":"a","to_90":"s", "to_180":"d"},
         "last_key":None,
         "last_key_time":0.0,
     },
     "servo3": {
+        "location":"wrist",
         "pin":3,
-        "position":POS_90,
+        "wf_pos":POS_90,
+        "coord_pos":0,
         "key_bindings":{"to_0":"q", "to_90":"w","to_180":"e"},
         "last_key":None,
         "last_key_time": 0.0
     },
     "servo4": {
+        "location":"finger",
         "pin":22,
-        "position":POS_90,
+        "wf_pos":POS_90,
+        "coord_pos":0,
         "key_bindings":{"to_0":"o", "to_90":"l", "to_180":"p"},
         "last_key":None,
         "last_key_time": 0.0
@@ -60,7 +70,7 @@ def move_to(pi, pin, pulse_width):
 def move(pi):
     #all motors to starting positions
     for m in MOTORS.values():
-        move_to(pi,m["pin"], m["position"])
+        move_to(pi,m["pin"], m["wf_pos"])
     time.sleep(.5)
 
     ##gets current terminal attributes and switces to cbreak for character-by character interpretation
@@ -92,19 +102,19 @@ def move(pi):
                     key_accept = True
                 elif (current_time - m["last_key_time"]) >= repeat_key_buffer:
                     key_accept = True
-                
+
                 if key_accept: #allows movement incrementally, or to the middle position
                     if key == k['to_0']:
-                        m["position"] -= step
-                        print(f"{k["to_0"]} pressed, wf length is now: {m["position"]}")
+                        m["wf_pos"] -= step
+                        print(f"{m["location"]}    key = {k["to_0"]}   wf len = {m["wf_pos"]}")
                     elif key == k['to_180']:
-                        m["position"] += step
-                        print(f"{k["to_180"]} pressed, wf length is now: {m["position"]}")
+                        m["wf_pos"] += step
+                        print(f"{m["location"]}    key = {k["to_180"]}   wf len = {m["wf_pos"]}")
                     elif key == k['to_90']:
-                        m["position"] = POS_90
-                        print(f"{k["to_90"]} pressed, center wf: {m["position"]}")
+                        m["wf_pos"] = POS_90
+                        print(f"{m["location"]}    key = {k["to_90"]}  center wf: {m["wf_pos"]}")
                         
-                    m["position"] = move_to(pi, m["pin"],m["position"])                 
+                    m["wf_pos"] = move_to(pi, m["pin"],m["wf_pos"])                 
                     m["last_key"] = key 
                     m["last_key_time"] = current_time
                 break      
