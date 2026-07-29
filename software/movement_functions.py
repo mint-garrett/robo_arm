@@ -5,55 +5,10 @@ import termios
 import time
 import tty
 
-##servo data
-period = 20000  # 50 Hz
-POS_0   = 1000
-POS_90  = 1500
-POS_180 = 2000
-##motor dictionary
+from config import period, POS_0, POS_180, POS_90, MOTORS, step, repeat_key_buffer, delay
+from coords import degree_vector_init, update_degree_vector
 
-MOTORS = {
-    "servo1": {
-        "location":"base",
-        "pin": 12,
-        "wf_pos": POS_90,
-        "coord_pos":0,
-        "key_bindings": {"to_0":"z", "to_90":"x", "to_180":"c"},
-        "last_key":None,
-        "last_key_time": 0.0,
-    },
-    "servo2": {
-        "location":"shoulder",
-        "pin":13,
-        "wf_pos":POS_0,
-        "coord_pos":0,
-        "key_bindings":{"to_0":"a","to_90":"s", "to_180":"d"},
-        "last_key":None,
-        "last_key_time":0.0,
-    },
-    "servo3": {
-        "location":"wrist",
-        "pin":3,
-        "wf_pos":POS_90,
-        "coord_pos":0,
-        "key_bindings":{"to_0":"q", "to_90":"w","to_180":"e"},
-        "last_key":None,
-        "last_key_time": 0.0
-    },
-    "servo4": {
-        "location":"finger",
-        "pin":22,
-        "wf_pos":POS_90,
-        "coord_pos":0,
-        "key_bindings":{"to_0":"o", "to_90":"l", "to_180":"p"},
-        "last_key":None,
-        "last_key_time": 0.0
-    }
-}
-#timing variables for move function
-step = 20
-repeat_key_buffer = .2
-delay = .01
+degree_vector = degree_vector_init()
 
 #returns key input as a string for move fn
 def get_key():
@@ -90,7 +45,7 @@ def move(pi):
                 break
                 
             current_time= time.time()
-            
+
             for name, m in MOTORS.items():
                 k = m["key_bindings"]
                 if key not in (k["to_0"],k["to_90"],k["to_180"]):
@@ -103,17 +58,27 @@ def move(pi):
                 elif (current_time - m["last_key_time"]) >= repeat_key_buffer:
                     key_accept = True
 
+                from coords import degree_vector_init, update_degree_vector
                 if key_accept: #allows movement incrementally, or to the middle position
                     if key == k['to_0']:
+                        m["old_wf_pos"] = m["wf_pos"]
                         m["wf_pos"] -= step
                         print(f"{m["location"]}    key = {k["to_0"]}   wf len = {m["wf_pos"]}")
+                        update_degree_vector(degree_vector, m["wf_pos"], m["old_wf_pos"])
+                        
                     elif key == k['to_180']:
+                        m["old_wf_pos"] = m["wf_pos"]
                         m["wf_pos"] += step
                         print(f"{m["location"]}    key = {k["to_180"]}   wf len = {m["wf_pos"]}")
+                        update_degree_vector(degree_vector, m["wf_pos"], m["old_wf_pos"])
+
                     elif key == k['to_90']:
+                        m["old_wf_pos"] = m["wf_pos"]
                         m["wf_pos"] = POS_90
                         print(f"{m["location"]}    key = {k["to_90"]}  center wf: {m["wf_pos"]}")
+                        update_degree_vector(degree_vector, m["wf_pos"], m["old_wf_pos"])
                         
+                    
                     m["wf_pos"] = move_to(pi, m["pin"],m["wf_pos"])                 
                     m["last_key"] = key 
                     m["last_key_time"] = current_time
