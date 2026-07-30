@@ -3,11 +3,13 @@ period = 20000  # 50 Hz
 POS_0   = 1000
 POS_90  = 1500
 POS_180 = 2000
+deg_per_us = .18 #180/(2000-1000)
 ##motor dictionary
 
 MOTORS = {
     "servo1": {
         "location":"base",
+        "idx":0,
         "pin": 12,
         "wf_pos": POS_90,
         "old_wf_pos":0,
@@ -18,8 +20,9 @@ MOTORS = {
     },
     "servo2": {
         "location":"shoulder",
+        "idx":1,
         "pin":13,
-        "wf_pos":POS_0,
+        "wf_pos":POS_90,
         "old_wf_pos":0,
         "coord_pos":0,
         "key_bindings":{"to_0":"a","to_90":"s", "to_180":"d"},
@@ -28,6 +31,7 @@ MOTORS = {
     },
     "servo3": {
         "location":"wrist",
+        "idx":2,
         "pin":3,
         "wf_pos":POS_90,
         "old_wf_pos":0,
@@ -38,6 +42,7 @@ MOTORS = {
     },
     "servo4": {
         "location":"finger",
+        "idx":3,
         "pin":22,
         "wf_pos":POS_90,
         "old_wf_pos":0,
