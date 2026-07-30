@@ -1,30 +1,24 @@
 import numpy
-from config import MOTORS
+from config import MOTORS, deg_per_us, POS_0, POS_180, POS_90
 
 def degree_vector_init(): 
-    degree_vector = numpy.matrix([[0],[0],[0],[0]])
+    degree_vector = numpy.matrix([[0],[0],[0],[0]], dtype=float )
     return degree_vector
 
-def update_degree_vector(degree_vector, current_wf_pos, last_wf_pos):
-    #magical code
-    #TODO: get degree values from waveform timing, write them into the degree vector
-     
-    for name, m in MOTORS.items():
-        if m["wf_pos"] != m["old_wf_pos"]:
-            sum = m["wf_pos"] - m["old_wf_pos"]
-            if sum == -20:
-                print("-20")
-            elif sum == 20:
-                print("20")
-            else:
-                print(f"{sum}")
-        else:
-            print("no change")
+def update_degree_vector(degree_vector, motor_idx, current_wf_pos, last_wf_pos):
+    if current_wf_pos == last_wf_pos:
+        return degree_vector
 
+    current_wf_pos = max(POS_0, min(POS_180, current_wf_pos))
+    last_wf_pos = max(POS_0, min(POS_180, last_wf_pos))
 
-    #return updated_degree_vector
+    wf_difference = current_wf_pos - last_wf_pos
+    deg_difference = wf_difference * deg_per_us
+    degree_vector[motor_idx, 0] += deg_difference
+    
+    return degree_vector
 
-def triangulate(updated_degree_vector, servo_number):
+def triangulate(degree_vector, servo_number):
     #TODO: take degree vector, and turn it into a system that can figure out where the finger is
     something = 0
     return something
