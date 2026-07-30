@@ -58,30 +58,42 @@ def move(pi):
                 elif (current_time - m["last_key_time"]) >= repeat_key_buffer:
                     key_accept = True
 
-                from coords import degree_vector_init, update_degree_vector
                 if key_accept: #allows movement incrementally, or to the middle position
                     if key == k['to_0']:
                         m["old_wf_pos"] = m["wf_pos"]
-                        m["wf_pos"] -= step
+
+                        if m["wf_pos"] <= POS_0:
+                            step_applied = 0
+                        else:
+                            step_applied = step
+
+                        m["wf_pos"] -= step_applied
                         print(f"{m["location"]}    key = {k["to_0"]}   wf len = {m["wf_pos"]}")
-                        update_degree_vector(degree_vector, m["wf_pos"], m["old_wf_pos"])
-                        
+                        update_degree_vector(degree_vector, m["idx"], m["wf_pos"], m["old_wf_pos"])  
+
                     elif key == k['to_180']:
                         m["old_wf_pos"] = m["wf_pos"]
-                        m["wf_pos"] += step
+
+                        if m["wf_pos"] <= POS_0:
+                            step_applied = 0
+                        else:
+                            step_applied = step
+
+                        m["wf_pos"] += step_applied
                         print(f"{m["location"]}    key = {k["to_180"]}   wf len = {m["wf_pos"]}")
-                        update_degree_vector(degree_vector, m["wf_pos"], m["old_wf_pos"])
+                        update_degree_vector(degree_vector, m["idx"], m["wf_pos"], m["old_wf_pos"])
 
                     elif key == k['to_90']:
                         m["old_wf_pos"] = m["wf_pos"]
                         m["wf_pos"] = POS_90
                         print(f"{m["location"]}    key = {k["to_90"]}  center wf: {m["wf_pos"]}")
-                        update_degree_vector(degree_vector, m["wf_pos"], m["old_wf_pos"])
+                        update_degree_vector(degree_vector, m["idx"], m["wf_pos"], m["old_wf_pos"])
                         
                     
                     m["wf_pos"] = move_to(pi, m["pin"],m["wf_pos"])                 
                     m["last_key"] = key 
                     m["last_key_time"] = current_time
+                    print(f"{degree_vector}/n")
                 break      
             time.sleep(delay)
 
