@@ -7,9 +7,10 @@ Hardware:
 - Custom power distribution PCB to distribute 5V @ 3A to aforementioned servos
 
 Software:
-- movement_functions.py: defines servo movment logic and functions
-- working_main.py: serves as executable file where movement function is called
-- config.py: includes MOTOR information dictionary as well as other important variables
+- All code is written in Python, as it is easy and works well with the Pi4B.
+- 2 function defining scripts, 1 configuration file and 1 main executable script
 
 Design:
 - 3D printed PLA frame designed in Fusion360 and printed on A1 Mini
+
+More details are provided in the respective README.mds in each folder.
